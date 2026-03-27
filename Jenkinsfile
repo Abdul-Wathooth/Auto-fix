@@ -17,16 +17,20 @@ pipeline {
             }
         }
     }
-
     post {
         failure {
-            echo "Build failed! Running error handler..."
+            steps {
+                echo "Build failed! Running error handler..."
 
-            sh '''
-            echo "Sending logs to AI..."
+                script {
+                    def logs = currentBuild.rawBuild.getLog(100).join("\n")
+                    writeFile file: 'error.log', text: logs
+                }
 
-            python3 error.py build.log
-            '''
+                sh '''
+                    source /opt/venv/bin/activate"
+                    python3 error.py build.log
+                '''
         }
     }
 }

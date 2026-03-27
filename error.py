@@ -1,6 +1,8 @@
 import sys
 import ollama
 
+client = ollama.Client(host='http://host.docker.internal:11434')
+
 if len(sys.argv) < 2:
     print("Usage: python3 error.py <logfile>")
     sys.exit(1)
@@ -8,26 +10,21 @@ if len(sys.argv) < 2:
 with open(sys.argv[1], "r") as f:
     logs = f.read()
 
-response = ollama.chat(
+response = client.chat(
     model='llama3',
-    host='http://host.docker.internal:11434',  # IMPORTANT
     messages=[
         {
             'role': 'user',
             'content': f"""
-You are a senior DevOps engineer.
+You are a DevOps expert.
+Analyze the error and give a clear fix.
 
-Analyze the error log and:
-1. Identify the root cause
-2. Explain clearly
-3. Give exact fix (commands/code)
-
-Error log:
+Error:
 {logs}
 """
         }
     ]
 )
 
-print("\nAI Solution:\n")
+print("\n🤖 AI Solution:\n")
 print(response['message']['content'])
