@@ -5,7 +5,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t flask-app .'
+                sh '''
+                docker build -t flask-app . > build.log 2>&1 || true
+                '''
             }
         }
 
@@ -18,18 +20,13 @@ pipeline {
 
     post {
         failure {
-            steps {
-                echo "Build failed! Running error handler..."
+            echo "Build failed! Running error handler..."
 
-                // Save logs
-                script {
-                    def logs = currentBuild.rawBuild.getLog(100).join("\n")
-                    writeFile file: 'error.log', text: logs
-                }
+            sh '''
+            echo "Sending logs to AI..."
 
-                // Call Python script
-                sh "python3 error.py error.log"
-            }
+            python3 error.py build.log
+            '''
         }
     }
 }
